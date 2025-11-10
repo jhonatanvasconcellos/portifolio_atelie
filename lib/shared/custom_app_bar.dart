@@ -28,22 +28,32 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return AppBar(
       backgroundColor: AppColors.dark,
       elevation: 1.0,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(
-            AppSpacing.space16,
-          ), 
+          bottom: Radius.circular(AppSpacing.space16),
         ),
       ),
       centerTitle: true,
-      title: Text(
-        'Ateliê Thais Dornelas',
-        style: AppTypography.appBarTitle,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: AppSpacing.space16),
+        child: Image.asset(
+          'assets/images/logo_appbar.png',
+          height: 52,
+          width: 52,
+
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(
+              Icons.storefront,
+              color: AppColors.white,
+              size: 32,
+            );
+          },
+        ),
       ),
+      title: Text('Thais Dornelas Costura', style: AppTypography.appBarTitle),
       actions: [
         IconButton(
           icon: const FaIcon(

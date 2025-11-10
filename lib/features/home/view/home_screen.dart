@@ -7,6 +7,7 @@ import 'package:atelie_portifolio/features/models/view/models_page.dart';
 import 'package:atelie_portifolio/core/providers/registration_provider.dart';
 import 'package:atelie_portifolio/features/registration/view/registration_page.dart';
 import 'package:atelie_portifolio/shared/custom_app_bar.dart';
+import 'package:atelie_portifolio/shared/widgets/order_summary_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,17 +61,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
     final String message =
         '''
-
 Pedido via App Ateliê
 ---------------------
 *Cliente:* ${registration.name}
 *WhatsApp:* ${registration.whatsapp}
-*Endereço:* ${registration.address}
-*Email:* ${registration.email}
 
-*Item Selecionado:*
-- Modelo: ${selection.selectedModel!.name}
-- Tecido: ${selection.selectedFabric!.name}
+*Endereço de Envio:*
+CEP: ${registration.cep}
+Rua: ${registration.rua}, Nº ${registration.numero}
+Bairro: ${registration.bairro}
+Cidade: ${registration.cidade}
+
+*Itens Selecionados:*
+Modelo: ${selection.selectedModel!.name}
+Tecido: ${selection.selectedFabric!.name}
 
 *Descrição do Modelo:*
 ${selection.selectedModel!.description}
@@ -104,37 +108,46 @@ ${selection.selectedFabric!.description}
   Widget build(BuildContext context) {
     final int currentIndex = ref.watch(homePageIndexProvider);
     final selection = ref.watch(selectionProvider);
+    final bool hasSelection = selection.hasSelection;
     final bool canFinalizeOrder =
         selection.selectedModel != null && selection.selectedFabric != null;
+
+    ref.listen<int>(homePageIndexProvider, (previous, next) {
+      if (_pageController.page?.round() != next) {
+        _pageController.animateToPage(
+          next,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
 
     return Scaffold(
       appBar: const CustomAppBar(
         socialLink: 'https://www.instagram.com/thaisdornelascostura',
       ),
-      body: PageView(
-        controller: _pageController,
-        children: _pages,
-        onPageChanged: (index) {
-          ref.read(homePageIndexProvider.notifier).state = index;
-        },
-      ),
-      floatingActionButton: canFinalizeOrder
-          ? FloatingActionButton.extended(
-              onPressed: () {
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              children: _pages,
+              onPageChanged: (index) {
+                ref.read(homePageIndexProvider.notifier).state = index;
+              },
+            ),
+          ),
+
+          if (hasSelection)
+            OrderSummaryBar(
+              selection: selection,
+              canFinalize: canFinalizeOrder,
+              onFinalize: () {
                 _sendWhatsAppMessage(ref, context);
               },
-              backgroundColor: Colors.green[600],
-              icon: const Icon(FontAwesomeIcons.whatsapp, color: Colors.white),
-              label: const Text(
-                'Finalizar Pedido',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+            ),
+        ],
+      ),
 
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(

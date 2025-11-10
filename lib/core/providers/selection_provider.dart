@@ -12,10 +12,15 @@ class SelectionNotifier extends StateNotifier<SelectionModel> {
   void selectFabric(ItemModel fabric) {
     state = state.copyWith(selectedFabric: fabric);
   }
-  
-  void clearSelection() {
-    state = SelectionModel();
+
+  void clearModel(){
+    state = SelectionModel(selectedFabric: state.selectedFabric);
   }
+
+  clearFabric(){
+    state = SelectionModel(selectedModel: state.selectedModel);
+  }
+  
 }
 
 final selectionProvider = StateNotifierProvider<SelectionNotifier, SelectionModel>((ref) {
